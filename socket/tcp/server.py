@@ -20,11 +20,17 @@ sock.listen(1)
 while True:
     print ('waiting for a connection')
     connection, client_address = sock.accept()
+    # 这里设为 0 的时候采用非阻塞IO
+    connection.setblocking(0)
     try:
         print ('connection from', client_address)
         while True:
             print ('Start Recv')
-            data = connection.recv(16)
+            try:
+                data = connection.recv(16)
+            except socket.error as e:
+                print (e)
+                continue
             print ('Recevid %r' % data)
             if data:
                 connection.sendall(data)
