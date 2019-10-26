@@ -12,7 +12,7 @@ messages = [
 server_address = ('localhost', 10000)
 socks = [
     socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    for _ in range(20)
+    for _ in range(5)
 ]
 
 print('Connecting to %s port %s' % server_address)
@@ -31,4 +31,4 @@ for message in messages:
         
         if not data:
             print('Closing socket', s.getsockname())
-            s.close(0)
+            s.close()

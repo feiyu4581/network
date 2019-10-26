@@ -6,11 +6,13 @@ import queue
 
 server_address = ('localhost', 10000)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.setblocking(0)
 
 server.bind(server_address)
 server.listen(5)
 
+# 可以使用 添加一个 select.EPOLLET 来使用 边缘触发,此时相关的连接的活动只会触发一次
 READ_ONLY = select.EPOLLIN | select.EPOLLPRI | select.EPOLLERR | select.EPOLLHUP
 READ_WRITE = READ_ONLY | select.EPOLLOUT
 message_queues = {}
