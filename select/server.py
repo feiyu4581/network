@@ -6,13 +6,14 @@ import queue
 
 # 创建一个 TCP/IP 的socket,并设置为 非阻塞
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.setblocking(0)
 
 server_address = ('localhost', 10000)
 print('Starting Server...')
 
 server.bind(server_address)
-server.listen(5)
+server.listen()
 
 inputs = [ server ]
 outputs = []
@@ -50,7 +51,7 @@ while inputs:
             data = s.recv(1024)
             if data:
                 print('Receivd %s from %s' % (data, s.getpeername()))
-                message_queues[s].put(data)
+                message_queues[s].put('{}\n'.format(data))
 
                 # 将当前连接加入到写入列表里面
                 if s not in outputs:
@@ -76,7 +77,7 @@ while inputs:
             outputs.remove(s)
         else:
             print('Sending %s to %s' % (next_msg, s.getpeername()))
-            s.send(next_msg)
+            s.send(next_msg.encode())
 
     # 处理异常连接
     for s in exceptional:
