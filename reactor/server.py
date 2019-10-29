@@ -13,3 +13,13 @@ event_loop.add_channel(accepter)
 event_loop.activate_sub_work(MessageChannel, 4)
 
 event_loop.run()
+
+
+def on_message(message):
+    print('On Message', message)
+    return message
+
+
+event_loop = EventLoop(server_address)
+event_loop.activate_sub_work(on_message, nums=4)
+event_loop.run()
