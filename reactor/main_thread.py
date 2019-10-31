@@ -1,10 +1,13 @@
 # coding:utf-8
 import socket
+from reactor.sub_thread import MessageChannel
+from reactor.channel import Channel
 
-class AccepterChannel(object):
+
+class AccepterChannel(Channel):
     def __init__(self, server_address):
         self.server_address = server_address
-        self.activate_server()
+        super(AccepterChannel, self).__init__(self.activate_server())
 
     def activate_server(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,11 +16,9 @@ class AccepterChannel(object):
         server.bind(self.server_address)
         server.listen(1024)
 
-        self.server = server
+        return server
 
-    def on_server_ready(self):
-        pass
-
-
-class AccepterHandler(object):
-    pass
+    def on_server_ready(self, event_loop):
+        connection, client_address = self.server.accept()
+        connection.setblocking(0)
+        event_loop.add_child_channel(MessageChannel(connection, client_address))

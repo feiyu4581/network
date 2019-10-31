@@ -1,18 +1,9 @@
 # coding:utf-8
-from reactor.dispatch.poll_dispatch import PollDispatch
+import sys
+import os
+
+sys.path.append('/home/zhuzx/github/network')
 from reactor.event_loop import EventLoop
-from reactor.main_thread import AccepterChannel, AccepterHandler
-from reactor.sub_thread import MessageChannel
-
-server_address = ('localhost', 10000)
-
-event_loop = EventLoop(PollDispatch())
-accepter = AccepterChannel().create_main_accepter()
-
-event_loop.add_channel(accepter)
-event_loop.activate_sub_work(MessageChannel, 4)
-
-event_loop.run()
 
 
 def on_message(message):
@@ -20,6 +11,15 @@ def on_message(message):
     return message
 
 
+server_address = ('localhost', 10000)
+
 event_loop = EventLoop(server_address)
 event_loop.activate_sub_work(on_message, nums=4)
 event_loop.run()
+
+
+
+# TODO
+# 1. server 似乎没有正确的派发的线程中去,都是 server 0
+# 2. client 最后一个 read 报错
+# 3. 解决每个线程都需要等待超时后才能添加 event 的问题

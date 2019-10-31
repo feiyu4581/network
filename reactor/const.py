@@ -1,11 +1,15 @@
 # coding:utf-8
+import select
 
 CHANNEL_ADD = 'add'
 CHANNEL_UPDATE = 'update'
 CHANNEL_DEL = 'delete'
 
 
-EVENT_READ = 'read'
-EVENT_WRITE = 'write'
-EVENT_ERROR = 'error'
-EVENT_HUP = 'hup'
+READ = select.EPOLLIN | select.EPOLLPRI
+WRITE = select.EPOLLOUT
+HUP = select.EPOLLHUP
+ERROR = select.EPOLLERR
+
+EVENT_READ = READ | HUP | ERROR
+EVENT_WRITE = EVENT_READ | WRITE

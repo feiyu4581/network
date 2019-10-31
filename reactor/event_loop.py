@@ -8,7 +8,8 @@ def sub_work(parent, num):
     child_loop = EventLoop(name='Thread {}'.format(num), main_thread=False)
     parent.add_child(child_loop)
 
-    parent.cond.notifyAll()
+    with parent.cond:
+        parent.cond.notifyAll()
 
     child_loop.run()
 
@@ -22,6 +23,7 @@ class EventLoop(object):
         self.waiting_channels = []
         self.work_nums = 0
         self.works = []
+        self.position = 0
 
         self.lock = threading.Lock()
         self.cond = threading.Condition()
@@ -32,6 +34,12 @@ class EventLoop(object):
         with self.lock:
             self.works.append(child_loop)
 
+    def add_child_channel(self, channel):
+        if self.position >= len(self.works):
+            self.position = 0
+
+        self.works[self.position].add_channel(channel)
+
     def handle_waiting_channels(self):
         for channel, event in self.waiting_channels:
             if event == CHANNEL_ADD:
@@ -40,6 +48,8 @@ class EventLoop(object):
                 self.dispatch.update(channel)
             elif event == CHANNEL_DEL:
                 self.dispatch.delete(channel)
+
+        self.waiting_channels = []
 
     def run(self):
         if self.main_thread:
@@ -51,13 +61,16 @@ class EventLoop(object):
                 channel.handle_callback(self, event)
 
     def add_channel(self, channel):
-        self.waiting_channels.append((channel, CHANNEL_ADD))
+        with self.lock:
+            self.waiting_channels.append((channel, CHANNEL_ADD))
 
     def del_channel(self, channel):
-        self.waiting_channels.append((channel, CHANNEL_DEL))
+        with self.lock:
+            self.waiting_channels.append((channel, CHANNEL_DEL))
 
     def update_channel(self, channel):
-        self.waiting_channels.append((channel, CHANNEL_UPDATE))
+        with self.lock:
+            self.waiting_channels.append((channel, CHANNEL_UPDATE))
 
     def add_main_channel(self):
         self.add_channel(AccepterChannel(self.server_address))
@@ -67,6 +80,8 @@ class EventLoop(object):
         self.work_nums = nums
 
         for num in range(nums):
-            threading.Thread(target=sub_work, args=(self, num))
-            
-            self.cond.wait()
+            with self.cond:
+                sub = threading.Thread(target=sub_work, args=(self, num))
+                sub.start()
+
+                self.cond.wait()
