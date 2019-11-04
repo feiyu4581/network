@@ -6,6 +6,7 @@ import threading
 
 def sub_work(parent, num):
     child_loop = EventLoop(name='Thread {}'.format(num), main_thread=False)
+
     parent.add_child(child_loop)
 
     with parent.cond:
@@ -39,6 +40,7 @@ class EventLoop(object):
             self.position = 0
 
         self.works[self.position].add_channel(channel)
+        self.position += 1
 
     def handle_waiting_channels(self):
         for channel, event in self.waiting_channels:

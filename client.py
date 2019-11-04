@@ -12,7 +12,7 @@ messages = [
 server_address = ('localhost', 10000)
 socks = [
     socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    for _ in range(5)
+    for _ in range(400)
 ]
 
 print('Connecting to %s port %s' % server_address)
