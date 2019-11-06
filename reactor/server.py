@@ -16,10 +16,3 @@ server_address = ('localhost', 10000)
 event_loop = EventLoop(server_address)
 event_loop.activate_sub_work(on_message, nums=4)
 event_loop.run()
-
-
-
-# TODO
-# 1. server 似乎没有正确的派发的线程中去,都是 server 0 / done
-# 2. client 最后一个 read 报错 / done
-# 3. 解决每个线程都需要等待超时后才能添加 event 的问题

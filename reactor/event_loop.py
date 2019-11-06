@@ -1,11 +1,16 @@
 # coding:utf-8
 from reactor.const import CHANNEL_ADD, CHANNEL_DEL, CHANNEL_UPDATE
 from reactor.dispatch.poll_dispatch import PollDispatch
-from reactor.main_thread import AccepterChannel
+from reactor.main_thread import AccepterChannel, WeakupChannel
 import threading
+import socket
+
 
 def sub_work(parent, num):
     child_loop = EventLoop(name='Thread {}'.format(num), main_thread=False)
+    parent_fd, child_fd = socket.socketpair()
+    child_loop.weak_server = parent_fd
+    child_loop.add_channel(WeakupChannel(child_fd))
 
     parent.add_child(child_loop)
 
@@ -25,6 +30,7 @@ class EventLoop(object):
         self.work_nums = 0
         self.works = []
         self.position = 0
+        self.weak_server = None
 
         self.lock = threading.Lock()
         self.cond = threading.Condition()
@@ -40,6 +46,7 @@ class EventLoop(object):
             self.position = 0
 
         self.works[self.position].add_channel(channel)
+        self.works[self.position].weak_server.send(b'weak')
         self.position += 1
 
     def handle_waiting_channels(self):
