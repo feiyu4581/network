@@ -8,7 +8,7 @@ from reactor.event_loop import EventLoop
 
 def on_message(message):
     print('On Message', message)
-    return message
+    return 'Hello, World'
 
 
 server_address = ('localhost', 10000)

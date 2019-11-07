@@ -26,10 +26,12 @@ class MessageChannel(Channel):
                     return event_loop.del_channel(self)
 
         if datas:
-            self.send_buffers.put('Send: %s\n' % (datas))
-            self.events = EVENT_WRITE
-            event_loop.update_channel(self)
-            print('Receive Datas %s from %s' % (datas, self.client_address))
+            response = event_loop.on_message(datas)
+            if response:
+                self.send_buffers.put('Send: %s\n' % (response))
+                self.events = EVENT_WRITE
+                event_loop.update_channel(self)
+                print('Receive Datas %s from %s' % (datas, self.client_address))
 
     def on_write(self, event_loop):
         try:

@@ -11,6 +11,7 @@ def sub_work(parent, num):
     parent_fd, child_fd = socket.socketpair()
     child_loop.weak_server = parent_fd
     child_loop.add_channel(WeakupChannel(child_fd))
+    child_loop.on_message = parent.on_message
 
     parent.add_child(child_loop)
 
